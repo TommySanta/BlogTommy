@@ -16,7 +16,7 @@ namespace BlogTommy.Models
         [Column("Email")]
         public string Email { get; set; }
 
-        [Column("PasswordHash")]
+        [Column("Password_Hash")]
         public string PasswordHash { get; set; }
 
         [Column("Role_Id")]

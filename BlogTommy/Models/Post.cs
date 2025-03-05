@@ -12,6 +12,7 @@ namespace BlogTommy.Models
 
         [Column("User_Id")]
         public int UserId { get; set; }
+        public User User { get; set; }
 
         [Column("Title")]
         public string Title { get; set; }

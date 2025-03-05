@@ -13,17 +13,21 @@ namespace BlogTommy.Repositories
             _context = context;
         }
 
-        public async Task<List<Post>> GetTopCommentedPostsAsync()
-        {
-            return await _context.Posts
-                .OrderByDescending(p => p.Comments.Count())
-                .Take(4)
-                .ToListAsync();
-        }
+        //public async Task<List<Post>> GetTopCommentedPostsAsync()
+        //{
+        //    return await _context.Posts
+        //        .OrderByDescending(p => p.Comments.Count())
+        //        .Take(4)
+        //        .ToListAsync();
+        //}
 
         public async Task<List<Post>> GetAllPostsAsync()
         {
-            return await _context.Posts.OrderByDescending(p => p.CreatedAt).ToListAsync();
+            return await _context.Posts
+                .Include(p => p.PostCategories)
+                .ThenInclude(pc => pc.Category)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
         }
 
         public async Task<List<Category>> GetCategoriesAsync()

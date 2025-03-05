@@ -15,11 +15,12 @@ namespace BlogTommy.Models
 
         [Column("User_Id")]
         public int? UserId { get; set; }
+        public User User { get; set; }
 
         [Column("Content")]
         public string Content { get; set; }
 
-        [Column("CreatedAt")]
+        [Column("Created_At")]
         public DateTime CreatedAt { get; set; }
     }
 }
