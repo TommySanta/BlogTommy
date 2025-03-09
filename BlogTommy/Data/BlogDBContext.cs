@@ -12,6 +12,7 @@ namespace BlogTommy.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<PostCategory> PostCategories { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PostCategory>()
