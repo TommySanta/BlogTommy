@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/blog/">
-    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+    @* <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet"> *@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700,900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="~/css/IndexHome.css" rel="stylesheet">
@@ -85,6 +85,11 @@
 
         <!-- Posts destacados -->
         <div class="row mb-4">
+            <div class="col-md-12">
+                <h2 class="section-title">
+                    <i class="fas fa-star me-2"></i>Posts Recientes
+                </h2>
+            </div>
             @foreach (var post in (List<Post>)ViewData["RecentPosts"])
             {
                 <div class="col-md-6 mb-3">
@@ -228,54 +233,48 @@
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+    @* <script src="../assets/dist/js/bootstrap.bundle.min.js"></script> *@
     <script src="https://unpkg.com/isotope-layout@3.0.6/dist/isotope.pkgd.min.js"></script>
     <script>
-        // Inicializa Isotope después de que todas las imágenes estén cargadas
-        $(window).on('load', function() {
-            // Inicializa el grid de Isotope
-            var $grid = $('#posts-container').isotope({
-                itemSelector: '.post-item',
-                layoutMode: 'fitRows',
-                transitionDuration: '0.4s'
+
+        // Inicializa el grid de Isotope
+        var $grid = $('#posts-container').isotope({
+            itemSelector: '.post-item',
+            layoutMode: 'fitRows'
+        });
+        // Maneja el clic en los filtros de categorías
+        $('.category-filter').on('click', function() {
+            var filterValue = $(this).attr('data-filter');
+            $grid.isotope({ filter: filterValue });
+
+            // Cambia la clase 'active' de los botones para reflejar el filtro seleccionado
+            $('.category-filter').removeClass('active');
+            $(this).addClass('active');
+        });
+        $(window).on('scroll', function() {
+                var wScroll = $(this).scrollTop();
+                $('.card').each(function() {
+                    var offset = $(this).offset().top;
+                    var windowHeight = $(window).height();
+
+                    // Ejecuta la animación solo si la tarjeta no tiene la clase 'animated'
+                    if (wScroll > offset - windowHeight + 200 && !$(this).hasClass('animated')) {
+                        $(this).addClass('animated');
+                    }
+                });
             });
 
-            // Maneja el clic en los filtros de categorías
-            $('.category-filter').on('click', function() {
-                var filterValue = $(this).attr('data-filter');
-                $grid.isotope({ filter: filterValue });
 
-                // Cambia la clase 'active' de los botones
-                $('.category-filter').removeClass('active');
-                $(this).addClass('active');
-
-                // Agrega efecto de animación para los elementos filtrados
-                setTimeout(function() {
-                    $grid.find('.post-item:visible').addClass('animated');
-                }, 300);
-            });
-
-            // Simula un clic inicial en "Todas"
+    </script>
+    <script>
+        $(document).ready(function() {
             var buttonTodas = document.getElementById("Todas");
             if (buttonTodas) {
-                buttonTodas.click();
+                buttonTodas.click(); // Simula un clic en el botón "Todas"
             }
         });
-
-        // Animación al hacer scroll
-        $(window).scroll(function() {
-            var wScroll = $(this).scrollTop();
-
-            // Animación para las tarjetas al hacer scroll
-            $('.card').each(function() {
-                var offset = $(this).offset().top;
-                var windowHeight = $(window).height();
-
-                if (wScroll > offset - windowHeight + 200) {
-                    $(this).addClass('animated');
-                }
-            });
-        });
     </script>
+
+
 </body>
 </html>
