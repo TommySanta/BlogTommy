@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<RepositoryHome>();
+builder.Services.AddScoped<RepositoryPosts>();
 builder.Services.AddDbContext<BlogDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlBlogDB")));
 
