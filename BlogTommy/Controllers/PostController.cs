@@ -49,18 +49,19 @@ namespace BlogTommy.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Si el modelo no es válido, vuelve a cargar las categorías
                 var categorias = await _repository.GetCategoriesAsync();
                 ViewBag.Categorias = new SelectList(categorias, "Id", "Name");
 
                 return View(model);
             }
 
+            string uniqueFileName = null;
+
             // Guardar la imagen en wwwroot/image
             if (model.Image != null)
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-                var uniqueFileName = $"{Guid.NewGuid()}_{model.Image.FileName}";
+                uniqueFileName = $"{Guid.NewGuid()}_{model.Image.FileName}";
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
@@ -74,17 +75,16 @@ namespace BlogTommy.Controllers
             {
                 Title = model.Title,
                 Content = model.Content,
-                Image_url = model.Image != null ? $"/image/{model.Image.FileName}" : null,
-                StatusId = 1, // El post se crea como borrador
+                Image_url = uniqueFileName != null ? $"/images/{uniqueFileName}" : null,
+                StatusId = 1,
+                UserId = 2,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };
 
-            // Guardar en la base de datos
             _context.Posts.Add(newPost);
             await _context.SaveChangesAsync();
 
-            // Asociar la categoría con el post
             var postCategory = new PostCategory
             {
                 PostId = newPost.Id,

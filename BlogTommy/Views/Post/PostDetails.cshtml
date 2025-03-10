@@ -5,7 +5,7 @@
 }
 
 <div class="container mt-5">
-    <img src="https://www.usatoday.com/gcdn/presto/2023/06/15/USAT/b031760f-26da-42a6-b626-fd20953a2743-SquarelogoPNG.png?crop=2055,2055,x0,y0" style="width: 100%; height: 70vh; object-fit: cover;" alt="Título">
+    <img src="@Model.Image_url" style="width: 100%; height: 70vh; object-fit: cover;" alt="Título">
 
     <!-- Título del post -->
     <h2 class="mt-4 text-center text-primary">@Model.Title</h2>
@@ -24,7 +24,7 @@
             <p class="fw-bold">Contenido del Post:</p>
             <div class="card shadow-sm p-3">
                 <div class="card-body">
-                    <p>@Model.Content</p>
+                    @Html.Raw(Model.Content)
                 </div>
             </div>
         </div>

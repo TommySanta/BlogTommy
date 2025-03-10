@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\css\IndexHome.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\IndexHome.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="ckeditor-full" Version="4.25.1" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
