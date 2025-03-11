@@ -429,8 +429,69 @@
 
         }
     </style>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --primary-light: #3498db;
+            --primary-dark: #003366;
+            --secondary-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --text-light: #f8f9fa;
+            --card-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --border-radius: 15px;
+            --transition-speed: 0.35s;
+        }
+
+        body {
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            padding: 1.5rem;
+            max-width: 1200px;
+        }
+
+        /* Animación de fondo mejorada */
+        .bg {
+            animation: slide 12s ease-in-out infinite alternate;
+            background-image: linear-gradient(-60deg, var(--primary-dark) 50%, var(--primary-light) 50%);
+            bottom: 0;
+            left: -50%;
+            opacity: 0.6;
+            position: fixed;
+            right: -50%;
+            top: 0;
+            z-index: -1;
+        }
+
+        .bg2 {
+            animation-direction: alternate-reverse;
+            animation-duration: 14s;
+        }
+
+        .bg3 {
+            animation-duration: 16s;
+        }
+
+        @@keyframes slide {
+            0% {
+                transform: translateX(-25%);
+            }
+
+            100% {
+                transform: translateX(25%);
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Fondo animado -->
+    <div class="bg"></div>
+    <div class="bg bg2"></div>
+    <div class="bg bg3"></div>
     <div class="container">
         <div class="page-container animate__animated animate__fadeIn">
             <div class="header">

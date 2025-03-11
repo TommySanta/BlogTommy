@@ -94,7 +94,7 @@ namespace BlogTommy.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Post creado correctamente y enviado a revisión.";
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
     }
     
