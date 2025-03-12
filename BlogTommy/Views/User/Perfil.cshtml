@@ -1,0 +1,258 @@
+﻿@using System.Linq
+
+
+<head>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="~/css/PerfilUser.css" rel="stylesheet">
+</head>
+<style>
+    :root {
+        --primary-color: #0056b3;
+        --primary-light: #3498db;
+        --primary-dark: #003366;
+        --secondary-color: #2c3e50;
+        --light-bg: #f8f9fa;
+        --text-light: #f8f9fa;
+        --card-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        --border-radius: 15px;
+        --transition-speed: 0.35s;
+    }
+
+
+
+
+    /* Animación de fondo mejorada */
+    .bg {
+        animation: slide 12s ease-in-out infinite alternate;
+        background-image: linear-gradient(-60deg, var(--primary-dark) 50%, var(--primary-light) 50%);
+        bottom: 0;
+        left: -50%;
+        opacity: 0.6;
+        position: fixed;
+        right: -50%;
+        top: 0;
+        z-index: -1;
+    }
+
+    .bg2 {
+        animation-direction: alternate-reverse;
+        animation-duration: 14s;
+    }
+
+    .bg3 {
+        animation-duration: 16s;
+    }
+
+    @@keyframes slide {
+        0% {
+            transform: translateX(-25%);
+        }
+
+        100% {
+            transform: translateX(25%);
+        }
+    }
+</style>
+<body>
+    <!-- Fondo animado -->
+    <div class="bg"></div>
+    <div class="bg bg2"></div>
+    <div class="bg bg3"></div>
+
+    <div class="container">
+        <header>
+            <h1>Mi Perfil</h1>
+            <div class="header-actions">
+                <button id="security-btn" class="btn btn-security" onclick="toggleSecurity() ">Seguridad de la cuenta</button>
+                <button class="btn btn-logout" onclick="location.href='@Url.Action("Logout", "User")'">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Sección 1: Información Básica -->
+        <section id="info-basica" class="profile-section">
+            <div class="section-title">
+                <h2>Información Básica</h2>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Nombre de usuario:</div>
+                <div class="info-value">. @Model.User.Username</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Correo electrónico: </div>
+                <div class="info-value">@Model.User.Email</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Fecha de registro: </div>
+                <div class="info-value">@Model.User.CreatedAt.ToString("dd 'de' MMMM 'de' yyyy")</div>
+            </div>
+        </section>
+
+        <!-- Sección 2: Configuración de Seguridad (Oculta por defecto) -->
+        <section id="seguridad" class="profile-section">
+            <div class="section-title">
+                <h2>Configuración de Seguridad</h2>
+            </div>
+            <div id="password-change">
+                <h3>Cambiar Contraseña</h3>
+                <form id="password-form">
+                    <div class="form-group">
+                        <label for="current-password">Contraseña actual:</label>
+                        <input type="password" id="current-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">Nueva contraseña:</label>
+                        <input type="password" id="new-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirmar nueva contraseña:</label>
+                        <input type="password" id="confirm-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Actualizar Contraseña</button>
+                </form>
+            </div>
+            <div id="account-delete" style="margin-top: 30px;">
+                <h3>Eliminar Cuenta</h3>
+                <p>Esta acción no se puede deshacer. Se eliminarán todos tus posts, comentarios y datos personales.</p>
+                <button id="delete-account-btn" class="btn btn-danger" onclick="showDeleteConfirmation()">Eliminar mi cuenta</button>
+            </div>
+        </section>
+
+        <!-- Sección 3: Actividad del Usuario -->
+        <section id="actividad" class="profile-section">
+            <div class="section-title">
+                <h2>Actividad del Usuario</h2>
+            </div>
+
+            <!-- Mis publicaciones -->
+            <!-- Sección 2: Mis Publicaciones -->
+            <div id="mis-publicaciones" style="margin-bottom: 30px;">
+                <h3>Mis Publicaciones</h3>
+                <div class="post-list" style="max-height: 500px; overflow-y: auto;">
+                    @foreach (var post in Model.Publicaciones)
+                    {
+                        <div class="post-item">
+                            <a href="@Url.Action("PostDetails", "Post", new { id = post.Id })" class="post-title">@post.Title</a>
+                            <div class="post-date">Publicado: @post.CreatedAt.ToString("dd 'de' MMMM, yyyy")</div>
+                            <div class="comment-count">@post.Comments.Count comentarios</div>
+                            <a href="@Url.Action("PostEdit", "Post", new { id = post.Id })" title="Editar Post">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </div>
+                        
+                    }
+                </div>
+            </div>
+
+
+            <!-- Posts en los que has comentado -->
+            <div id="posts-comentados">
+                <h3>Posts en los que has comentado</h3>
+                @if (Model.PostsComentados != null && @Model.PostsComentados.Count > 0)
+                {
+                    <div class="comment-posts-list" style="max-height: 500px; overflow-y: auto;">
+                        @foreach (var post in Model.PostsComentados)
+                        {
+                            <div class="comment-post-item">
+                                <a href="@Url.Action("PostDetails", "Post", new { id = post.Id })" class="post-title">@post.Title</a>
+                                <div class="post-date">
+                                    Último comentario:
+                                    @post.Comments
+                                    .OrderByDescending(c => c.CreatedAt)
+                                    .FirstOrDefault()?
+                                    .CreatedAt.ToString("dd 'de' MMMM 'de' yyyy")
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Aún no has comentado en ningún post. ¡Anímate a comentar algo!
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Modal de confirmación para eliminar cuenta -->
+        <div id="delete-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="hideDeleteConfirmation()">&times;</span>
+                <h3>¿Estás seguro?</h3>
+                <p>Esta acción eliminará permanentemente tu cuenta y todo su contenido. Esta acción no se puede deshacer.</p>
+                <div class="form-group">
+                    <label for="confirm-delete-password">Ingresa tu contraseña para confirmar:</label>
+                    <input type="password" id="confirm-delete-password" required>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn" onclick="hideDeleteConfirmation()">Cancelar</button>
+                    <button class="btn btn-danger" onclick="deleteAccount()">Confirmar Eliminación</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar/ocultar la sección de seguridad
+        function toggleSecurity() {
+            const securitySection = document.getElementById('seguridad');
+            const securityButton = document.getElementById('security-btn');
+
+            if (securitySection.style.display === 'block') {
+                securitySection.style.display = 'none';
+                securityButton.textContent = 'Seguridad de la cuenta';
+            } else {
+                securitySection.style.display = 'block';
+                securityButton.textContent = 'Ocultar seguridad';
+
+                // Hacer scroll a la sección de seguridad
+                securitySection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Función para mostrar el modal de confirmación de eliminación
+        function showDeleteConfirmation() {
+            document.getElementById('delete-modal').style.display = 'block';
+        }
+
+        // Función para ocultar el modal de confirmación
+        function hideDeleteConfirmation() {
+            document.getElementById('delete-modal').style.display = 'none';
+        }
+
+        // Simulación de funciones
+        function logout() {
+            alert('Cerrando sesión...');
+            // En la implementación real, aquí se redirigiría al endpoint de logout
+        }
+
+        function deleteAccount() {
+            const password = document.getElementById('confirm-delete-password').value;
+            if (password) {
+                alert('Cuenta eliminada correctamente');
+                // En la implementación real, aquí se enviaría una solicitud al controlador
+            } else {
+                alert('Por favor, introduce tu contraseña para confirmar');
+            }
+        }
+
+        // Manejador para el formulario de cambio de contraseña
+        document.getElementById('password-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                alert('Las contraseñas no coinciden');
+                return;
+            }
+
+            alert('Contraseña actualizada correctamente');
+            // En la implementación real, aquí se enviaría una solicitud al controlador
+            this.reset();
+        });
+    </script>
+</body>

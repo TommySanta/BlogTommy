@@ -14,5 +14,6 @@ namespace BlogTommy.Models
         public string Content { get; set; }
 
         public IFormFile Image { get; set; }
+
     }
 }

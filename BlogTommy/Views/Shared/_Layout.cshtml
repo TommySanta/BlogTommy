@@ -8,26 +8,227 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BlogTommy.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --hover-color: #2980b9;
+            --text-color: #333;
+            --light-bg: #f8f9fa;
+            --border-color: #e9ecef;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            background-color: #f5f7f9;
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            background-color: #fff;
+            border: none;
+        }
+
+        .navbar-brand {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--primary-color) !important;
+            transition: all 0.3s ease;
+        }
+
+            .navbar-brand:hover {
+                color: var(--hover-color) !important;
+                transform: translateY(-2px);
+            }
+
+        .nav-item {
+            position: relative;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #495057 !important;
+            padding: 10px 15px !important;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+            .nav-link:hover, .nav-link.active {
+                color: var(--primary-color) !important;
+                background-color: rgba(52, 152, 219, 0.05);
+            }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -5px;
+            left: 50%;
+            background-color: var(--primary-color);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            opacity: 0;
+        }
+
+        .nav-item:hover::after, .nav-item.active::after {
+            width: 80%;
+            opacity: 1;
+        }
+
+        /* Navbar Toggler */
+        .navbar-toggler {
+            border: none;
+            padding: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+            .navbar-toggler:focus {
+                outline: none;
+                box-shadow: none;
+            }
+
+            .navbar-toggler:hover {
+                transform: rotate(90deg);
+            }
+
+        .navbar-toggler-icon {
+            background-image: none !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .navbar-toggler-icon::before {
+                content: '\f0c9';
+                font-family: 'Font Awesome 6 Free';
+                font-weight: 900;
+                color: var(--primary-color);
+                font-size: 1.5rem;
+            }
+
+        /* User profile icon */
+        .user-profile-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 4px;
+            color: #495057;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .user-profile-link:hover {
+                background-color: rgba(52, 152, 219, 0.05);
+                color: var(--primary-color);
+            }
+
+            .user-profile-link i {
+                margin-right: 8px;
+                font-size: 1.2rem;
+            }
+
+        /* Create Post Button */
+        .create-post-btn {
+            background-color: var(--primary-color);
+            color: white !important;
+            border-radius: 4px;
+            padding: 10px 15px !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+            .create-post-btn i {
+                margin-right: 8px;
+            }
+
+            .create-post-btn:hover {
+                background-color: var(--hover-color);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                color: white !important;
+            }
+
+        /* Container styling */
+        .container {
+            padding: 20px 15px;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 991.98px) {
+            .navbar-collapse
+
+        {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 15px;
+        }
+
+        .nav-item::after {
+            display: none;
+        }
+
+        .nav-item {
+            margin: 5px 0;
+        }
+
+        .nav-link {
+            padding: 12px 15px !important;
+        }
+
+        .create-post-btn {
+            margin-top: 10px;
+            display: inline-flex;
+            justify-content: center;
+        }
+
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BlogTommy</a>
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-feather-alt"></i> BlogTommy
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
+                    <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home"></i> Inicio
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="User" asp-action="Login">
+                                <i class="fas fa-shield-alt"></i> Login
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link create-post-btn" asp-area="" asp-controller="Post" asp-action="Create">
+                                <i class="fas fa-pen-to-square"></i> Crear Post
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="Create">Crear Post</a>
+                            <a class="nav-link user-profile-link" asp-area="" asp-controller="User" asp-action="Perfil">
+                                <i class="fas fa-user-circle"></i> Mi Perfil
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -39,19 +240,24 @@
             @RenderBody()
         </main>
     </div>
-
-    @* <footer class="border-top footer text-muted"> *@
-    @*     <div class="container"> *@
-    @*         &copy; 2025 - BlogTommy - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> *@
-    @*     </div> *@
-    @* </footer> *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        // Add 'active' class to current page
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentPath || (currentPath.includes(href) && href !== '/')) {
+                    link.classList.add('active');
+                    link.parentElement.classList.add('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

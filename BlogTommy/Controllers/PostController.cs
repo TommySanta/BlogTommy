@@ -96,6 +96,77 @@ namespace BlogTommy.Controllers
             TempData["SuccessMessage"] = "Post creado correctamente y enviado a revisión.";
             return RedirectToAction("Index", "Home");
         }
+        public IActionResult PostEdit(int id)
+        {
+            var post = _context.Posts
+                               .Include(p => p.PostCategories)
+                               .FirstOrDefault(p => p.Id == id);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new PostViewModel
+            {
+                Title = post.Title,
+                Content = post.Content,
+                Category = post.PostCategories.FirstOrDefault()?.CategoryId ?? 0,
+            };
+
+            // Cargar las categorías en el ViewBag
+            ViewBag.Categorias = _context.Categories
+                                         .Select(c => new SelectListItem
+                                         {
+                                             Value = c.Id.ToString(),
+                                             Text = c.Name
+                                         }).ToList();
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult PostEdit(int id, PostViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var post = _context.Posts
+                                   .Include(p => p.PostCategories)
+                                   .FirstOrDefault(p => p.Id == id);
+
+                if (post == null)
+                {
+                    return NotFound();
+                }
+
+                post.Title = model.Title;
+                post.Content = model.Content;
+
+                // Actualización de categoría
+                var category = _context.Categories.FirstOrDefault(c => c.Id == model.Category);
+                if (category != null)
+                {
+                    // Suponiendo que solo existe una categoría para cada post
+                    post.PostCategories.FirstOrDefault().CategoryId = category.Id;
+                }
+
+                if (model.Image != null)
+                {
+                    // Aquí puedes agregar la lógica para manejar la imagen si la subes
+                    var imagePath = "/images/" + model.Image.FileName; // Simple path
+                    post.Image_url = imagePath;
+                }
+
+                post.UpdatedAt = DateTime.Now;
+
+                _context.SaveChanges();
+                return RedirectToAction("Index"); // O donde quieras redirigir
+            }
+
+            return View(model);
+        }
+
+
     }
-    
 }

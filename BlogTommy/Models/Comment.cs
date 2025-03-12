@@ -22,5 +22,7 @@ namespace BlogTommy.Models
 
         [Column("Created_At")]
         public DateTime CreatedAt { get; set; }
+
+        public Post Post { get; set; }
     }
 }

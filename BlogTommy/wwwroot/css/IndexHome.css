@@ -351,16 +351,7 @@ body {
         border-radius: 3px;
     }
 
-/* Isotope grid transitions */
-.isotope-wrapper {
-    margin-left: -15px;
-    margin-right: -15px;
-}
-
-.post-item {
-    padding: 15px;
-    transition: transform var(--transition-speed);
-}
+-
 
 /* Responsive adjustments */
 @@media (max-width: 768px) {
