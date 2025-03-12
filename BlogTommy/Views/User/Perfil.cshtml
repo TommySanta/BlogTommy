@@ -136,7 +136,7 @@
                             <a href="@Url.Action("PostDetails", "Post", new { id = post.Id })" class="post-title">@post.Title</a>
                             <div class="post-date">Publicado: @post.CreatedAt.ToString("dd 'de' MMMM, yyyy")</div>
                             <div class="comment-count">@post.Comments.Count comentarios</div>
-                            <a href="@Url.Action("PostEdit", "Post", new { id = post.Id })" title="Editar Post">
+                            <a href="@Url.Action("Edit", "Post", new { id = post.Id })" title="Editar Post">
                                 <i class="fas fa-edit"></i>
                             </a>
                         </div>

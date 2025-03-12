@@ -85,16 +85,12 @@
                                 </div>
                             </div>
                         </div>
-
+                        
                         <div class="col-md-4">
                             <div class="form-group fade-in-up" style="animation-delay: 0.2s;">
                                 <label for="Category" class="form-label">Categoría</label>
-                                <select id="Category" name="CategoryId" class="form-control" asp-items="ViewBag.Categorias">
+                                <select id="Category" name="Category" class="form-control" asp-items="ViewBag.Categorias">
                                     <option value="">Seleccionar categoría</option>
-                                    @foreach (var categoria in ViewBag.Categorias as List<SelectListItem>)
-                                    {
-                                        <option value="@categoria.Value" @@(categoria.Value == Model.CategoryId.ToString() ? "selected" : "")>@categoria.Text</option>
-                                    }
                                 </select>
                             </div>
                         </div>
@@ -109,7 +105,8 @@
                                 <p>Arrastra y suelta tu imagen aquí o haz clic para seleccionar</p>
                                 <p class="text-muted">Se recomienda una imagen de al menos 1200 x 630 píxeles</p>
                             </div>
-                            @* <img src="@Url.Content(Model.ImagePath)" id="preview" class="preview-image" /> *@
+                            <img src="" id="preview" class="preview-image" style="display:none;" />
+                            
                         </div>
                     </div>
 
@@ -219,6 +216,18 @@
                 event.preventDefault();
             }
         }
+        document.addEventListener('DOMContentLoaded', function() {
+            const preview = document.getElementById('preview');
+            const fileUploadContent = document.querySelector('.file-upload-content');
+            const imageUrl = '@ViewBag.ImageUrl'; // Aquí tomamos la URL de la imagen desde ViewBag
+
+            if (imageUrl) {
+                preview.src = imageUrl;
+                preview.style.display = 'block';
+                fileUploadContent.style.opacity = '0.5';
+            }
+        });
     </script>
+
 </body>
 </html>

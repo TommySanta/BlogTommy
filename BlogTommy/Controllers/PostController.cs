@@ -4,6 +4,7 @@ using BlogTommy.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace BlogTommy.Controllers
 {
@@ -96,10 +97,11 @@ namespace BlogTommy.Controllers
             TempData["SuccessMessage"] = "Post creado correctamente y enviado a revisión.";
             return RedirectToAction("Index", "Home");
         }
-        public IActionResult PostEdit(int id)
+        public IActionResult Edit(int id)
         {
             var post = _context.Posts
                                .Include(p => p.PostCategories)
+                               .ThenInclude(pc => pc.Category)
                                .FirstOrDefault(p => p.Id == id);
 
             if (post == null)
@@ -113,27 +115,32 @@ namespace BlogTommy.Controllers
                 Content = post.Content,
                 Category = post.PostCategories.FirstOrDefault()?.CategoryId ?? 0,
             };
+            // Pasar la URL de la imagen al ViewBag
+            ViewBag.ImageUrl = post.Image_url;
 
             // Cargar las categorías en el ViewBag
             ViewBag.Categorias = _context.Categories
-                                         .Select(c => new SelectListItem
-                                         {
-                                             Value = c.Id.ToString(),
-                                             Text = c.Name
-                                         }).ToList();
+                                 .Select(c => new SelectListItem
+                                 {
+                                     Value = c.Id.ToString(),
+                                     Text = c.Name,
+                                     Selected = c.Id == viewModel.Category // <-- Esta es la clave
+                                 }).ToList();
+            ViewBag.CategoriaSeleccionada = _context.Categories
+                                            .FirstOrDefault(c => c.Id == viewModel.Category)?.Name ?? "Sin categoría";
+
 
             return View(viewModel);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult PostEdit(int id, PostViewModel model)
+        public async Task<IActionResult> Edit(int id, PostViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var post = _context.Posts
-                                   .Include(p => p.PostCategories)
-                                   .FirstOrDefault(p => p.Id == id);
+                var post = await _context.Posts
+                                          .Include(p => p.PostCategories)
+                                          .FirstOrDefaultAsync(p => p.Id == id);
 
                 if (post == null)
                 {
@@ -144,25 +151,51 @@ namespace BlogTommy.Controllers
                 post.Content = model.Content;
 
                 // Actualización de categoría
-                var category = _context.Categories.FirstOrDefault(c => c.Id == model.Category);
-                if (category != null)
+                var existingCategory = post.PostCategories.FirstOrDefault();
+                if (existingCategory != null)
                 {
-                    // Suponiendo que solo existe una categoría para cada post
-                    post.PostCategories.FirstOrDefault().CategoryId = category.Id;
+                    _context.PostCategories.Remove(existingCategory);
                 }
 
+                if (model.Category != 0)
+                {
+                    post.PostCategories.Add(new PostCategory
+                    {
+                        PostId = post.Id,
+                        CategoryId = model.Category
+                    });
+                }
+
+                // Manejo de la imagen
                 if (model.Image != null)
                 {
-                    // Aquí puedes agregar la lógica para manejar la imagen si la subes
-                    var imagePath = "/images/" + model.Image.FileName; // Simple path
-                    post.Image_url = imagePath;
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Image.FileName;
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.Image.CopyToAsync(fileStream);
+                    }
+
+                    post.Image_url = "/images/" + uniqueFileName;
                 }
 
                 post.UpdatedAt = DateTime.Now;
 
                 _context.SaveChanges();
-                return RedirectToAction("Index"); // O donde quieras redirigir
+                TempData["SuccessMessage"] = "Post Editado correctamente.";
+                return RedirectToAction("PostDetails", new { id = post.Id });
             }
+
+            // Si el modelo no es válido, recargar las categorías
+            ViewBag.Categorias = _context.Categories
+                                         .Select(c => new SelectListItem
+                                 
+                                         {
+                                             Value = c.Id.ToString(),
+                                             Text = c.Name
+                                         }).ToList();
 
             return View(model);
         }
