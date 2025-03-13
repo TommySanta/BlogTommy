@@ -103,9 +103,18 @@
                 <div class="post-meta fade-in-up" style="animation-delay: 0.3s;">
                     <div class="post-author">
                         <img src="https://cdn-icons-png.flaticon.com/512/9187/9187604.png" alt="@Model.User.Username" class="author-avatar">
-                        <div>
+                        <div class="author-info">
                             <h5 class="author-name">@Model.User.Username</h5>
-                            <div class="post-date"><i class="far fa-calendar-alt"></i> @Model.CreatedAt.ToString("dd MMM yyyy")</div>
+                            <div class="post-dates">
+                                <div class="post-date">
+                                    <span class="date-label"><i class="far fa-calendar-plus"></i> Publicado:</span>
+                                    <span class="date-value">@Model.CreatedAt.ToString("dd MMM yyyy")</span>
+                                </div>
+                                <div class="post-date">
+                                    <span class="date-label"><i class="fas fa-sync-alt"></i>Editado:</span>
+                                    <span class="date-value">@Model.UpdatedAt.ToString("dd MMM yyyy")</span>
+                                </div>
+                            </div>
                         </div>
                         @if (Model.PostCategories != null && Model.PostCategories.Any())
                         {

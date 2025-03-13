@@ -5,6 +5,8 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="~/css/PerfilUser.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.all.min.js"></script>
 </head>
 <style>
     :root {
@@ -90,40 +92,38 @@
         </section>
 
         <!-- Sección 2: Configuración de Seguridad -->
-<section id="seguridad" class="profile-section">
-    <div class="section-title">
-        <h2>Configuración de Seguridad</h2>
-    </div>
+        <section id="seguridad" class="profile-section">
+            <div class="section-title">
+                <h2>Configuración de Seguridad</h2>
+            </div>
 
-    <!-- Cambiar Contraseña -->
-    <div id="password-change">
-        <h3>Cambiar Contraseña</h3>
-        <form id="password-form" method="post" action="@Url.Action("CambiarContraseña", "User")">
-            <div class="form-group">
-                <label for="current-password">Contraseña actual:</label>
-                <input type="password" name="currentPassword" id="current-password" required>
+            <!-- Cambiar Contraseña -->
+            <div id="password-change">
+                <h3>Cambiar Contraseña</h3>
+                <form id="password-form" method="post" action="@Url.Action("CambiarContraseña", "User")">
+                    <div class="form-group">
+                        <label for="current-password">Contraseña actual:</label>
+                        <input type="password" name="currentPassword" id="current-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">Nueva contraseña:</label>
+                        <input type="password" name="newPassword" id="new-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirmar nueva contraseña:</label>
+                        <input type="password" name="confirmPassword" id="confirm-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Actualizar Contraseña</button>
+                </form>
             </div>
-            <div class="form-group">
-                <label for="new-password">Nueva contraseña:</label>
-                <input type="password" name="newPassword" id="new-password" required>
-            </div>
-            <div class="form-group">
-                <label for="confirm-password">Confirmar nueva contraseña:</label>
-                <input type="password" name="confirmPassword" id="confirm-password" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Actualizar Contraseña</button>
-        </form>
-    </div>
 
-    <!-- Eliminar Cuenta -->
-    <div id="account-delete" style="margin-top: 30px;">
-        <h3>Eliminar Cuenta</h3>
-        <p>Esta acción no se puede deshacer. Se eliminarán todos tus posts, comentarios y datos personales.</p>
-        <form method="post" action="@Url.Action("EliminarCuenta", "User")">
-            <button type="submit" class="btn btn-danger">Eliminar mi cuenta</button>
-        </form>
-    </div>
-</section>
+            <!-- Eliminar Cuenta -->
+            <div id="account-delete" style="margin-top: 30px;">
+                <h3>Eliminar Cuenta</h3>
+                <p>Esta acción no se puede deshacer. Se eliminarán todos tus posts, comentarios y datos personales.</p>
+                <button type="button" class="btn btn-danger" onclick="showDeleteConfirmation()">Eliminar mi cuenta</button>
+            </div>
+        </section>
 
         <!-- Sección 3: Actividad del Usuario -->
         <section id="actividad" class="profile-section">
@@ -139,13 +139,21 @@
                     @foreach (var post in Model.Publicaciones)
                     {
                         <div class="post-item">
-                            <a href="@Url.Action("PostDetails", "Post", new { id = post.Id })" class="post-title">@post.Title</a>
-                            <div class="post-date">Publicado: @post.CreatedAt.ToString("dd 'de' MMMM, yyyy")</div>
-                            <div class="comment-count">@post.Comments.Count comentarios</div>
-                            <a href="@Url.Action("Edit", "Post", new { id = post.Id })" title="Editar Post">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <button class="btn btn-danger btn-sm" onclick="deletePost(@post.Id)">Eliminar</button>
+                            <div class="post-content">
+                                <a href="@Url.Action("PostDetails", "Post", new { id = post.Id })" class="post-title">@post.Title</a>
+                                <div class="post-meta">
+                                    <span class="post-date">Publicado: @post.CreatedAt.ToString("dd 'de' MMMM, yyyy")</span>
+                                    <span class="comment-count"><i class="fas fa-comment"></i> @post.Comments.Count comentarios</span>
+                                </div>
+                            </div>
+                            <div class="post-actions">
+                                <a href="@Url.Action("Edit", "Post", new { id = post.Id })" class="btn btn-edit" title="Editar Post">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <button class="btn btn-danger" onclick="deletePost(@post.Id)">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
                         </div>
                         
                     }
@@ -156,19 +164,18 @@
             <!-- Posts en los que has comentado -->
             <div id="posts-comentados">
                 <h3>Posts en los que has comentado</h3>
-                @if (Model.PostsComentados != null && @Model.PostsComentados.Count > 0)
+                @if (Model.PostsComentados != null && Model.PostsComentados.Count > 0)
                 {
                     <div class="comment-posts-list" style="max-height: 500px; overflow-y: auto;">
                         @foreach (var post in Model.PostsComentados)
                         {
-                            <div class="comment-post-item">
-                                <a href="@Url.Action("PostDetails", "Post", new { id = post.Id })" class="post-title">@post.Title</a>
-                                <div class="post-date">
-                                    Último comentario:
-                                    @post.Comments
-                                    .OrderByDescending(c => c.CreatedAt)
-                                    .FirstOrDefault()?
-                                    .CreatedAt.ToString("dd 'de' MMMM 'de' yyyy")
+                            <div class="post-item">
+                                <div class="post-content">
+                                    <a href="@Url.Action("PostDetails", "Post", new { id = post.Id })" class="post-title">@post.Title</a>
+                                    <div class="post-meta">
+                                        <span class="post-date">Publicado: @post.CreatedAt.ToString("dd 'de' MMMM, yyyy")</span>
+                                        <span class="comment-count"><i class="fas fa-comment"></i> @(post.Comments?.Count ?? 0) comentarios</span>
+                                    </div>
                                 </div>
                             </div>
                         }
@@ -202,7 +209,83 @@
     </div>
 
     <script>
-        // Función para mostrar/ocultar la sección de seguridad
+
+                function showDeleteConfirmation() {
+            Swal.fire({
+                title: '¿Eliminar cuenta?',
+                html: `
+                    <p>Esta acción eliminará permanentemente tu cuenta y todo su contenido.</p>
+                    <p><strong>Esta acción no se puede deshacer.</strong></p>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: 'var(--secondary-color)',
+                confirmButtonText: 'Eliminar mi cuenta',
+                cancelButtonText: 'Cancelar',
+                focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    
+                    Swal.fire({
+                        title: 'Eliminando cuenta...',
+                        text: 'Por favor espera',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    
+                    fetch('/User/EliminarCuenta', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la solicitud, estado: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: '¡Cuenta eliminada!',
+                                text: 'Tu cuenta ha sido eliminada correctamente.',
+                                icon: 'success',
+                                confirmButtonColor: 'var(--primary-color)',
+                                confirmButtonText: 'Aceptar'
+                            }).then(() => {
+                                window.location.href = '/User/Login';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message || 'Ocurrió un error al eliminar la cuenta.',
+                                icon: 'error',
+                                confirmButtonColor: 'var(--primary-color)',
+                                confirmButtonText: 'Aceptar'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Ocurrió un error: ' + error.message,
+                            icon: 'error',
+                            confirmButtonColor: 'var(--primary-color)',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    });
+                }
+            });
+        }
+
+
+
         function toggleSecurity() {
             const securitySection = document.getElementById('seguridad');
             const securityButton = document.getElementById('security-btn');
@@ -217,63 +300,153 @@
             }
         }
 
-        // Función para mostrar el modal de confirmación de eliminación
-        function showDeleteConfirmation() {
-            document.getElementById('delete-modal').style.display = 'block';
-        }
-
-        // Función para ocultar el modal de confirmación
-        function hideDeleteConfirmation() {
-            document.getElementById('delete-modal').style.display = 'none';
-        }
-
-        function logout() {
-            alert('Cerrando sesión...');
-        }
-
-        function deleteAccount() {
-            const password = document.getElementById('confirm-delete-password').value;
-            if (password) {
-                alert('Cuenta eliminada correctamente');
-            } else {
-                alert('Por favor, introduce tu contraseña para confirmar');
-            }
-        }
         function deletePost(postId) {
-            if (confirm("¿Estás seguro de que quieres eliminar este post?")) {
-                fetch('/User/DeletePost', { // Asegúrate de que la ruta sea correcta
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ postId: postId })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la solicitud, estado: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert('Post eliminado correctamente.');
-                        location.reload(); // Recargar la página para actualizar la lista de posts
-                    } else {
-                        alert('Error al eliminar el post: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    alert('Ocurrió un error: ' + error.message);
-                });
-            }
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "No podrás revertir esta acción",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: 'var(--primary-color)',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                background: 'var(--light-bg)',
+                borderRadius: 'var(--border-radius)',
+                customClass: {
+                    popup: 'animated zoomIn'
+                },
+                animation: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Mostrar indicador de carga mientras se procesa
+                    Swal.fire({
+                        title: 'Eliminando...',
+                        text: 'Por favor espera',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    fetch('/User/DeletePost', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ postId: postId })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la solicitud, estado: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: '¡Eliminado!',
+                                text: 'Tu post ha sido eliminado correctamente.',
+                                icon: 'success',
+                                confirmButtonColor: 'var(--primary-color)',
+                                confirmButtonText: 'Aceptar'
+                            }).then(() => {
+                                location.reload(); // Recargar la página
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonColor: 'var(--primary-color)',
+                                confirmButtonText: 'Aceptar'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Ocurrió un error: ' + error.message,
+                            icon: 'error',
+                            confirmButtonColor: 'var(--primary-color)',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    });
+                }
+            });
         }
 
-        // Manejador para el formulario de cambio de contraseña
+        // También vamos a mejorar el popup para eliminar cuenta
+        function showDeleteConfirmation() {
+            Swal.fire({
+                title: '¿Eliminar cuenta?',
+                html: `
+                    <p>Esta acción eliminará permanentemente tu cuenta y todo su contenido.</p>
+                    <p><strong>Esta acción no se puede deshacer.</strong></p>
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label for="confirm-delete-password">Ingresa tu contraseña para confirmar:</label>
+                        <input type="password" id="confirm-delete-password" class="swal2-input" required>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: 'var(--secondary-color)',
+                confirmButtonText: 'Eliminar mi cuenta',
+                cancelButtonText: 'Cancelar',
+                focusCancel: true,
+                preConfirm: () => {
+                    const password = document.getElementById('confirm-delete-password').value;
+                    if (!password) {
+                        Swal.showValidationMessage('Por favor, introduce tu contraseña para confirmar');
+                        return false;
+                    }
+                    return password;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Aquí puedes enviar la contraseña y proceder con la eliminación
+                    // Ejemplo básico:
+                    Swal.fire({
+                        title: 'Cuenta eliminada',
+                        text: 'Tu cuenta ha sido eliminada correctamente',
+                        icon: 'success',
+                        confirmButtonColor: 'var(--primary-color)'
+                    }).then(() => {
+                        // Redireccionar a la página principal o de logout
+                        window.location.href = '/';
+                    });
+                }
+            });
+        }
+
+        // También mejoramos el manejo del cambio de contraseña
         document.getElementById('password-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
             const currentPassword = document.getElementById('current-password').value;
             const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Las contraseñas nuevas no coinciden',
+                    icon: 'error',
+                    confirmButtonColor: 'var(--primary-color)'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Actualizando contraseña...',
+                text: 'Por favor espera',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
             const formData = new FormData();
             formData.append('currentPassword', currentPassword);
@@ -291,16 +464,32 @@
             })
             .then(data => {
                 if (data.success) {
-                    alert(data.message); // Mostrar el mensaje del servidor
-                    this.reset(); // Limpiar el formulario
-                    document.getElementById('seguridad').style.display = 'none'; // Ocultar la sección de seguridad
-                    document.getElementById('security-btn').textContent = 'Seguridad de la cuenta'; // Cambiar el texto del botón
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonColor: 'var(--primary-color)'
+                    }).then(() => {
+                        this.reset(); // Limpiar el formulario
+                        document.getElementById('seguridad').style.display = 'none';
+                        document.getElementById('security-btn').textContent = 'Seguridad de la cuenta';
+                    });
                 } else {
-                    alert(data.message); // Mostrar el mensaje de error del servidor
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.message,
+                        icon: 'error',
+                        confirmButtonColor: 'var(--primary-color)'
+                    });
                 }
             })
             .catch(error => {
-                alert('Ocurrió un error: ' + error.message);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error: ' + error.message,
+                    icon: 'error',
+                    confirmButtonColor: 'var(--primary-color)'
+                });
             });
         });
     </script>

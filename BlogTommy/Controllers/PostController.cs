@@ -59,6 +59,23 @@ namespace BlogTommy.Controllers
                 return View(model);
             }
 
+            // Obtener el email del usuario logueado desde la sesión
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                TempData["ErrorMessage"] = "No se ha podido identificar al usuario. Por favor, inicia sesión.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "El usuario no se encontró en la base de datos.";
+                return RedirectToAction("Login", "Account");
+            }
+
             string uniqueFileName = null;
 
             // Guardar la imagen en wwwroot/image
@@ -81,7 +98,7 @@ namespace BlogTommy.Controllers
                 Content = model.Content,
                 Image_url = uniqueFileName != null ? $"/images/{uniqueFileName}" : null,
                 StatusId = 1,
-                UserId = 2,
+                UserId = user.Id,  // Asignar el ID del usuario logueado
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };

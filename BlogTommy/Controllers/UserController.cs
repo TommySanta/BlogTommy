@@ -18,18 +18,17 @@ namespace BlogTommy.Controllers
         public IActionResult Perfil()
         {
             var userEmail = HttpContext.Session.GetString("UserEmail");
-
             if (string.IsNullOrEmpty(userEmail))
             {
                 return RedirectToAction("Login");
             }
-
             var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
 
-            // Obtener los posts que el usuario ha comentado, incluyendo el post relacionado
+            // Obtener los posts que el usuario ha comentado, incluyendo el post y sus comentarios
             var postsComentados = _context.Comments
                                           .Where(c => c.UserId == user.Id)
                                           .Include(c => c.Post)
+                                          .ThenInclude(p => p.Comments) // Incluir los comentarios del post
                                           .OrderByDescending(c => c.CreatedAt)
                                           .Select(c => c.Post)
                                           .Distinct()
@@ -43,9 +42,8 @@ namespace BlogTommy.Controllers
                                         .Include(p => p.Comments)
                                         .OrderByDescending(p => p.CreatedAt)
                                         .ToList(),
-                PostsComentados = postsComentados // Añadimos los posts comentados
+                PostsComentados = postsComentados
             };
-
             return View(model);
         }
 
@@ -125,36 +123,50 @@ namespace BlogTommy.Controllers
         public IActionResult EliminarCuenta()
         {
             var userEmail = HttpContext.Session.GetString("UserEmail");
-
             if (string.IsNullOrEmpty(userEmail))
             {
-                return RedirectToAction("Login");
+                return Json(new { success = false, message = "Sesión expirada. Por favor, inicia sesión nuevamente." });
             }
 
             var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
-
             if (user != null)
             {
-                // Eliminar los comentarios del usuario
-                var userComments = _context.Comments.Where(c => c.UserId == user.Id).ToList();
-                _context.Comments.RemoveRange(userComments);
+                try
+                {
+                    // 1. Obtener todos los posts del usuario
+                    var userPosts = _context.Posts.Where(p => p.UserId == user.Id).ToList();
+                    // 2. Eliminar cada post individualmente siguiendo el mismo patrón que en DeletePost
+                    foreach (var post in userPosts)
+                    {
+                        // Eliminar comentarios relacionados con este post
+                        var comments = _context.Comments.Where(c => c.PostId == post.Id);
+                        _context.Comments.RemoveRange(comments);
+                        // Eliminar categorías relacionadas con este post
+                        var postCategories = _context.PostCategories.Where(pc => pc.PostId == post.Id);
+                        _context.PostCategories.RemoveRange(postCategories);
+                        // Eliminar el post
+                        _context.Posts.Remove(post);
+                    }
+                    // 3. Eliminar los comentarios hechos por el usuario en posts de otros usuarios
+                    var remainingComments = _context.Comments.Where(c => c.UserId == user.Id);
+                    _context.Comments.RemoveRange(remainingComments);
+                    // 4. Eliminar el usuario
+                    _context.Users.Remove(user);
+                    // 5. Guardar los cambios
+                    _context.SaveChanges();
+                    // 6. Cerrar la sesión
+                    HttpContext.Session.Clear();
 
-                // Eliminar los posts del usuario
-                var userPosts = _context.Posts.Where(p => p.UserId == user.Id).ToList();
-                _context.Posts.RemoveRange(userPosts);
-
-                // Eliminar el usuario
-                _context.Users.Remove(user);
-
-                // Guardar los cambios
-                _context.SaveChanges();
-
-                HttpContext.Session.Remove("UserEmail"); // Eliminar la sesión del usuario
-                TempData["SuccessMessage"] = "Tu cuenta ha sido eliminada con éxito.";
-                return RedirectToAction("Login"); // Redirigir al login
+                    return Json(new { success = true, message = "Tu cuenta ha sido eliminada con éxito." });
+                }
+                catch (Exception ex)
+                {
+                    // Registrar la excepción para diagnóstico
+                    // Logger.LogError(ex, "Error al eliminar la cuenta del usuario");
+                    return Json(new { success = false, message = "Ocurrió un error al eliminar la cuenta: " + ex.Message });
+                }
             }
-
-            return View("Perfil");
+            return Json(new { success = false, message = "Usuario no encontrado." });
         }
 
         [HttpPost]
@@ -178,11 +190,21 @@ namespace BlogTommy.Controllers
                 return Json(new { success = false, message = "Post no encontrado o no pertenece al usuario." });
             }
 
+            // Eliminar comentarios relacionados
+            var comments = _context.Comments.Where(c => c.PostId == post.Id);
+            _context.Comments.RemoveRange(comments);
+
+            // Eliminar categorías relacionadas
+            var postCategories = _context.PostCategories.Where(pc => pc.PostId == post.Id);
+            _context.PostCategories.RemoveRange(postCategories);
+
+            // Ahora eliminar el post
             _context.Posts.Remove(post);
             _context.SaveChanges();
 
             return Json(new { success = true, message = "Post eliminado correctamente." });
         }
+
 
         public class DeletePostRequest
         {
