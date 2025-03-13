@@ -13,7 +13,9 @@ namespace BlogTommy.Models
         [Required]
         public string Content { get; set; }
 
+        // Hacemos que la propiedad Image no sea obligatoria
         public IFormFile Image { get; set; }
 
     }
+
 }

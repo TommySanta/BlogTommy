@@ -28,7 +28,7 @@ body {
         box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
     }
 
-.header {
+.Details-header {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     color: white;
     padding: 30px;
@@ -36,14 +36,14 @@ body {
     margin-bottom: 20px;
 }
 
-    .header h2 {
+    .Details-header h2 {
         margin: 0;
         font-weight: 600;
         display: flex;
         align-items: center;
     }
 
-        .header h2 i {
+        .Details-header h2 i {
             margin-right: 15px;
         }
 

@@ -62,7 +62,7 @@
     <div class="bg bg3"></div>
 
     <div class="container">
-        <header>
+        <header class="mi-perfil">
             <h1>Mi Perfil</h1>
             <div class="header-actions">
                 <button id="security-btn" class="btn btn-security" onclick="toggleSecurity() ">Seguridad de la cuenta</button>
@@ -89,35 +89,41 @@
             </div>
         </section>
 
-        <!-- Sección 2: Configuración de Seguridad (Oculta por defecto) -->
-        <section id="seguridad" class="profile-section">
-            <div class="section-title">
-                <h2>Configuración de Seguridad</h2>
+        <!-- Sección 2: Configuración de Seguridad -->
+<section id="seguridad" class="profile-section">
+    <div class="section-title">
+        <h2>Configuración de Seguridad</h2>
+    </div>
+
+    <!-- Cambiar Contraseña -->
+    <div id="password-change">
+        <h3>Cambiar Contraseña</h3>
+        <form id="password-form" method="post" action="@Url.Action("CambiarContraseña", "User")">
+            <div class="form-group">
+                <label for="current-password">Contraseña actual:</label>
+                <input type="password" name="currentPassword" id="current-password" required>
             </div>
-            <div id="password-change">
-                <h3>Cambiar Contraseña</h3>
-                <form id="password-form">
-                    <div class="form-group">
-                        <label for="current-password">Contraseña actual:</label>
-                        <input type="password" id="current-password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="new-password">Nueva contraseña:</label>
-                        <input type="password" id="new-password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="confirm-password">Confirmar nueva contraseña:</label>
-                        <input type="password" id="confirm-password" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Actualizar Contraseña</button>
-                </form>
+            <div class="form-group">
+                <label for="new-password">Nueva contraseña:</label>
+                <input type="password" name="newPassword" id="new-password" required>
             </div>
-            <div id="account-delete" style="margin-top: 30px;">
-                <h3>Eliminar Cuenta</h3>
-                <p>Esta acción no se puede deshacer. Se eliminarán todos tus posts, comentarios y datos personales.</p>
-                <button id="delete-account-btn" class="btn btn-danger" onclick="showDeleteConfirmation()">Eliminar mi cuenta</button>
+            <div class="form-group">
+                <label for="confirm-password">Confirmar nueva contraseña:</label>
+                <input type="password" name="confirmPassword" id="confirm-password" required>
             </div>
-        </section>
+            <button type="submit" class="btn btn-primary">Actualizar Contraseña</button>
+        </form>
+    </div>
+
+    <!-- Eliminar Cuenta -->
+    <div id="account-delete" style="margin-top: 30px;">
+        <h3>Eliminar Cuenta</h3>
+        <p>Esta acción no se puede deshacer. Se eliminarán todos tus posts, comentarios y datos personales.</p>
+        <form method="post" action="@Url.Action("EliminarCuenta", "User")">
+            <button type="submit" class="btn btn-danger">Eliminar mi cuenta</button>
+        </form>
+    </div>
+</section>
 
         <!-- Sección 3: Actividad del Usuario -->
         <section id="actividad" class="profile-section">
@@ -139,6 +145,7 @@
                             <a href="@Url.Action("Edit", "Post", new { id = post.Id })" title="Editar Post">
                                 <i class="fas fa-edit"></i>
                             </a>
+                            <button class="btn btn-danger btn-sm" onclick="deletePost(@post.Id)">Eliminar</button>
                         </div>
                         
                     }
@@ -206,8 +213,6 @@
             } else {
                 securitySection.style.display = 'block';
                 securityButton.textContent = 'Ocultar seguridad';
-
-                // Hacer scroll a la sección de seguridad
                 securitySection.scrollIntoView({ behavior: 'smooth' });
             }
         }
@@ -222,37 +227,81 @@
             document.getElementById('delete-modal').style.display = 'none';
         }
 
-        // Simulación de funciones
         function logout() {
             alert('Cerrando sesión...');
-            // En la implementación real, aquí se redirigiría al endpoint de logout
         }
 
         function deleteAccount() {
             const password = document.getElementById('confirm-delete-password').value;
             if (password) {
                 alert('Cuenta eliminada correctamente');
-                // En la implementación real, aquí se enviaría una solicitud al controlador
             } else {
                 alert('Por favor, introduce tu contraseña para confirmar');
+            }
+        }
+        function deletePost(postId) {
+            if (confirm("¿Estás seguro de que quieres eliminar este post?")) {
+                fetch('/User/DeletePost', { // Asegúrate de que la ruta sea correcta
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ postId: postId })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la solicitud, estado: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert('Post eliminado correctamente.');
+                        location.reload(); // Recargar la página para actualizar la lista de posts
+                    } else {
+                        alert('Error al eliminar el post: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Ocurrió un error: ' + error.message);
+                });
             }
         }
 
         // Manejador para el formulario de cambio de contraseña
         document.getElementById('password-form').addEventListener('submit', function(e) {
             e.preventDefault();
+
             const currentPassword = document.getElementById('current-password').value;
             const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
 
-            if (newPassword !== confirmPassword) {
-                alert('Las contraseñas no coinciden');
-                return;
-            }
+            const formData = new FormData();
+            formData.append('currentPassword', currentPassword);
+            formData.append('newPassword', newPassword);
 
-            alert('Contraseña actualizada correctamente');
-            // En la implementación real, aquí se enviaría una solicitud al controlador
-            this.reset();
+            fetch('/User/CambiarContraseña', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la solicitud, estado: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert(data.message); // Mostrar el mensaje del servidor
+                    this.reset(); // Limpiar el formulario
+                    document.getElementById('seguridad').style.display = 'none'; // Ocultar la sección de seguridad
+                    document.getElementById('security-btn').textContent = 'Seguridad de la cuenta'; // Cambiar el texto del botón
+                } else {
+                    alert(data.message); // Mostrar el mensaje de error del servidor
+                }
+            })
+            .catch(error => {
+                alert('Ocurrió un error: ' + error.message);
+            });
         });
     </script>
 </body>

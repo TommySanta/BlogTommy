@@ -17,7 +17,7 @@ body {
     padding: 20px;
 }
 
-header {
+.mi-perfil {
     background-color: #2c3e50;
     color: white;
     padding: 1rem;
@@ -28,7 +28,7 @@ header {
     align-items: center;
 }
 
-.header-actions {
+.mi-perfil {
     display: flex;
     gap: 10px;
 }

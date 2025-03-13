@@ -1,4 +1,5 @@
 ﻿using BlogTommy.Data;
+using BlogTommy.Filter;
 using BlogTommy.Models;
 using BlogTommy.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,8 @@ namespace BlogTommy.Controllers
 
             return View(post);
         }
+
+        [ServiceFilter(typeof(AuthenticatedUserFilter))]
         public async Task<IActionResult> Create()
         {
             // Obtener las categorías desde la base de datos
@@ -115,20 +118,22 @@ namespace BlogTommy.Controllers
                 Content = post.Content,
                 Category = post.PostCategories.FirstOrDefault()?.CategoryId ?? 0,
             };
+
             // Pasar la URL de la imagen al ViewBag
             ViewBag.ImageUrl = post.Image_url;
 
-            // Cargar las categorías en el ViewBag
+            // Cargar las categorías en el ViewBag para el Dropdown
             ViewBag.Categorias = _context.Categories
                                  .Select(c => new SelectListItem
                                  {
                                      Value = c.Id.ToString(),
                                      Text = c.Name,
-                                     Selected = c.Id == viewModel.Category // <-- Esta es la clave
+                                     Selected = c.Id == viewModel.Category // Seleccionar la categoría actual
                                  }).ToList();
+
+            // Pasar el nombre de la categoría seleccionada
             ViewBag.CategoriaSeleccionada = _context.Categories
                                             .FirstOrDefault(c => c.Id == viewModel.Category)?.Name ?? "Sin categoría";
-
 
             return View(viewModel);
         }
@@ -184,6 +189,7 @@ namespace BlogTommy.Controllers
                 post.UpdatedAt = DateTime.Now;
 
                 _context.SaveChanges();
+
                 TempData["SuccessMessage"] = "Post Editado correctamente.";
                 return RedirectToAction("PostDetails", new { id = post.Id });
             }
@@ -191,13 +197,49 @@ namespace BlogTommy.Controllers
             // Si el modelo no es válido, recargar las categorías
             ViewBag.Categorias = _context.Categories
                                          .Select(c => new SelectListItem
-                                 
                                          {
                                              Value = c.Id.ToString(),
                                              Text = c.Name
                                          }).ToList();
 
             return View(model);
+        }
+        [HttpPost]
+        public IActionResult AddComment(int id, string Content)
+        {
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return Json(new { success = false, message = "Usuario no autenticado." });
+            }
+
+            var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Usuario no encontrado." });
+            }
+
+            var comment = new Comment
+            {
+                PostId = id,
+                UserId = user.Id,
+                Content = Content,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Comments.Add(comment);
+            _context.SaveChanges();
+
+            return Json(new
+            {
+                success = true,
+                comment = new
+                {
+                    userUsername = user.Username,
+                    content = comment.Content,
+                    createdAt = comment.CreatedAt.ToString("dd MMM yyyy, HH:mm")
+                }
+            });
         }
 
 

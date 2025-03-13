@@ -105,7 +105,8 @@
                                 <p>Arrastra y suelta tu imagen aquí o haz clic para seleccionar</p>
                                 <p class="text-muted">Se recomienda una imagen de al menos 1200 x 630 píxeles</p>
                             </div>
-                            <img src="" id="preview" class="preview-image" style="display:none;" />
+                            <img src="@ViewBag.ImageUrl" id="preview" class="preview-image" style="display:block;" />
+
                             
                         </div>
                     </div>
@@ -134,40 +135,27 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- TinyMCE desde el CDN con tu clave API -->
-    <script src="https://cdn.tiny.cloud/1/71w4qcd6x7qdgiar0zguslc4sk88mkg59xkv6skf05q8p5mk/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.tiny.cloud/1/71w4qcd6x7qdgiar0zguslc4sk88mkg59xkv6skf05q8p5mk/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 
+    <!-- Place the following <script> and <textarea> tags your HTML's <body> -->
     <script>
-        // Inicializar TinyMCE
         tinymce.init({
-            selector: '#editor',
-            plugins: [
-                'a11ychecker', 'accordion', 'advlist', 'anchor', 'autolink', 'autosave',
-                'charmap', 'code', 'codesample', 'directionality', 'emoticons', 'exportpdf',
-                'exportword', 'fullscreen', 'help', 'image', 'importcss', 'importword',
-                'insertdatetime', 'link', 'lists', 'markdown', 'math', 'media', 'nonbreaking',
-                'pagebreak', 'preview', 'quickbars', 'save', 'searchreplace', 'table',
-                'visualblocks', 'visualchars', 'wordcount'
-            ],
-            toolbar:
-            'undo redo | accordion accordionremove | \
-            importword exportword exportpdf | math | \
-            blocks fontfamily fontsize | bold italic underline strikethrough | \
-            align numlist bullist | link image | table media | \
-            lineheight outdent indent | forecolor backcolor removeformat | \
-            charmap emoticons | code fullscreen preview | save print | \
-            pagebreak anchor codesample | ltr rtl',
-            menubar: 'file edit view insert format tools table help',
-            height: 400,
-            skin: 'oxide',
-            content_css: 'default',
-            placeholder: 'Comienza a escribir tu artículo aquí...',
-            images_upload_url: '/upload',
-            automatic_uploads: true,
-            setup: function(editor) {
-                editor.on('init', function() {
-                    editor.getContainer().classList.add('fade-in-up');
-                });
-            }
+          selector: 'textarea',
+          plugins: [
+            // Core editing features
+            'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+            // Your account includes a free trial of TinyMCE premium features
+            // Try the most popular premium features until Mar 24, 2025:
+            'checklist', 'mediaembed', 'casechange', 'export', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 'ai', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown','importword', 'exportword', 'exportpdf'
+          ],
+          toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+          tinycomments_mode: 'embedded',
+          tinycomments_author: 'Author name',
+          mergetags_list: [
+            { value: 'First.Name', title: 'First Name' },
+            { value: 'Email', title: 'Email' },
+          ],
+          ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
         });
 
         // Función para previsualizar la imagen
@@ -219,7 +207,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const preview = document.getElementById('preview');
             const fileUploadContent = document.querySelector('.file-upload-content');
-            const imageUrl = '@ViewBag.ImageUrl'; // Aquí tomamos la URL de la imagen desde ViewBag
+            const imageUrl = '@ViewBag.ImageUrl';
 
             if (imageUrl) {
                 preview.src = imageUrl;
