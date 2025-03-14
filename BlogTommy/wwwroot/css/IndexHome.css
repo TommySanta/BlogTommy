@@ -66,12 +66,12 @@ body {
     width: 100%;
     height: 65vh;
     object-fit: cover;
-    transition: transform var(--transition-speed);
+/*    transition: transform var(--transition-speed);*/
 }
 
-.site-header:hover .header-image {
+/*.site-header:hover .header-image {
     transform: scale(1.03);
-}
+}*/
 
 /* Categorías */
 .categories-buttons {
